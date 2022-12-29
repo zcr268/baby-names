@@ -50,6 +50,42 @@ proxies = {
     
 }
 
+all = 3
+warn = 2
+info = 1
+debug = 0
+trace = -1
+
+debug_level = all
+
+
+def print_msg(level, msg):
+    print('''%s %s begin ============================================
+%s
+============================================ end!''' %
+          (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), level, msg))
+
+
+def print_trace(msg):
+    if debug_level == trace:
+        print_msg("trace", msg)
+
+def print_debug(msg):
+    if debug_level == debug:
+        print_msg("debug", msg)
+
+def print_info(msg):
+    if debug_level == info:
+        print_msg("info", (msg))
+
+def print_warn(msg):
+    if debug_level == warn:
+        print_msg("warn", (msg))
+
+def print_all(msg):
+    if debug_level <= all:
+        print_msg("all", msg)
+
 class BabyName():
     def __init__(self, config={}, name_dict={}, is_score=True, use_proxy=False, is_check_component=False, component_preferences="", component_list=[], is_check_duplicate_name=False, max_thread=5, is_filter_out=False):
         # 根目录
@@ -353,7 +389,7 @@ class BabyName():
 
         return names_total, girls_total, boys_total, name_sex
 
-    def compute_name_wuxing(self, name_postfix="测试"):
+    def compute_name_wuxing(self, name_postfix=""):
         """
         调用接口，执行计算，返回结果
         :param name_postfix: 
@@ -414,6 +450,9 @@ class BabyName():
             # ============================================================
             proxies = self.get_proxy()
             content = requests.post(url=self.REQUEST_URL, data=_data, headers=self.headers, timeout=5, proxies=proxies).content
+
+            print_trace("full_name=%s content=%s" % (full_name,content))
+
             soup = BeautifulSoup(content, 'html.parser')
 
             # 根据生辰八字, 获取命中缺什么, 五行得分
@@ -540,14 +579,15 @@ class BabyName():
         result_data["mingzhuxingxiu"] = "X"
         result_data['total_score'] = 100
 
-        # 过滤掉重名为0的.
-        if self.is_filter_out:
-            if names_total == '0人':
-                return False
+        if self.is_check_duplicate_name:
+            # 过滤掉重名为0的.
+            if self.is_filter_out:
+                if names_total == '0人':
+                    return False
 
-        # 根绝性别设置筛选对应性别的姓名
-        if self.CONFIG["sex"] != name_sex:
-            return False
+            # 根绝性别设置筛选对应性别的姓名
+            if self.CONFIG["sex"] != name_sex:
+                return False
 
         if self.is_score:
             # 获取姓名八字/五格
@@ -580,6 +620,7 @@ class BabyName():
         return "%s%s" % ((self.CONFIG["name_prefix"]), name_postfix)
 
     def online_compute_score(self, _fieldnames, name_postfix, cur_idx, shengyushu):
+        # print_debug("%s %s %s %s" % (_fieldnames,name_postfix,cur_idx,shengyushu))
         # 识别笔划数
         if len(name_postfix) > 3:
             _pinyin = pinyin(u'%s' % name_postfix)[0][0] + pinyin(u'%s' % name_postfix)[1][0]
@@ -701,6 +742,7 @@ if __name__ == "__main__":
         3. 部分接口请求次数过多可能会被封IP, 推荐购买使用 "猿人云" 提供的动态转发代理, 并替换本文件get_proxy方法中的授权信息即可. (可使用我的推广链接申请: https://ape.vip/T-ovAUDi)
     最后, 如该程序对您有所帮助, 请关注作者微信服务号以表支持(搜索: "欧赛安全"), 后续将提供更多有意思的开源代码或在线小工具.
     """
+    debug_level = debug
 
     # 是否进行打分
     is_score = True
@@ -714,13 +756,13 @@ if __name__ == "__main__":
     component_list = settings.MU # 木命对应的名字
 
     # 是否检查重名
-    is_check_duplicate_name = True
+    is_check_duplicate_name = False
 
     # 是否过滤掉重名数为零的(设置为True, renren网查不到的将不显示) 
-    is_filter_out = True
+    is_filter_out = False
 
     # 最大线程数
-    max_thread = 10
+    max_thread = 15
 
     babyname = BabyName(config=settings.CONFIG, name_dict=settings.NAME_DICTS, is_score=is_score, use_proxy=use_proxy, is_check_component=is_check_component, component_preferences=component_preferences, component_list=component_list, is_check_duplicate_name=is_check_duplicate_name, max_thread=max_thread, is_filter_out=is_filter_out)
     babyname.run()

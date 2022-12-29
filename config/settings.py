@@ -31,15 +31,15 @@ CONFIG["name_prefix"] = "王"
 # 宝宝性别
 CONFIG["sex"] = "男"
 # 宝宝出生地(省)
-CONFIG["area_province"] = "上海"
+CONFIG["area_province"] = "北京"
 # 宝宝出生地(市)
-CONFIG["area_region"] = "上海"
+CONFIG["area_region"] = "北京"
 # 宝宝出生年份
-CONFIG["year"] = "1990"
+CONFIG["year"] = "2022"
 # 宝宝出生月份
 CONFIG["month"] = "2"
 # 宝宝出生日期
-CONFIG["day"] = "21"
+CONFIG["day"] = "5"
 # 宝宝出生时间
 CONFIG["hour"] = "21"
 CONFIG["minute"] = "18"
